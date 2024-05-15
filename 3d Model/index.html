@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Model with Babylon.js</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://preview.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+  <script>
+    // Set up Babylon.js engine
+const canvas = document.createElement("canvas");
+document.body.appendChild(canvas);
+const engine = new BABYLON.Engine(canvas, true);
+
+// Create scene
+const scene = new BABYLON.Scene(engine);
+
+// Create camera
+// Create a static camera
+const camera = new BABYLON.FreeCamera("StaticCamera", new BABYLON.Vector3(1, 1, 1), scene);
+camera.setTarget(BABYLON.Vector3.Zero());
+
+camera.attachControl(canvas, true);
+scene.activeCamera = camera;
+
+// Load 3D model
+BABYLON.SceneLoader.ImportMesh("", "path/to/your/", "model.glb", scene, function (meshes) {
+  // Get the first mesh from the loaded model
+  const model = meshes[0];
+  model.scaling = new BABYLON.Vector3(0.01, 0.01, 0.01);
+  // Initialize rotation angles
+  let previousX = 0;
+  let previousY = 0;
+
+  // Register pointer move event listener
+  scene.onPointerMove = function (evt, pickResult) {
+    if (pickResult.hit) {
+      // Calculate rotation angles based on cursor movement
+      const currentX = evt.offsetX;
+      const currentY = evt.offsetY;
+      const dx = currentX - previousX;
+      const dy = currentY - previousY;
+
+      // Rotate the model
+      model.rotation.y += dx / engine.getRenderWidth() * Math.PI * 2;
+      model.rotation.x += dy / engine.getRenderHeight() * Math.PI * 2;
+
+      // Update previous cursor position
+      previousX = currentX;
+      previousY = currentY;
+    }
+  };
+});
+
+// Add a directional light to the scene
+const light = new BABYLON.DirectionalLight("dir01", new BABYLON.Vector3(0, 0, 1), scene); // Positioned in front of the model
+light.intensity = 2; // Increase the intensity of the light
+
+// Run render loop
+engine.runRenderLoop(function () {
+  scene.render();
+});
+
+// Handle window resize
+window.addEventListener("resize", function () {
+  engine.resize();
+});
+
+  </script>
+</body>
+</html>

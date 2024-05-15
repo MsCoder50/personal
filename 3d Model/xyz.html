@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Model</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      width: 100vw;
+      height: 200vh;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%; 
+    }
+  </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/92/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r92/examples/js/loaders/GLTFLoader.js"></script>
+  <script>
+
+var scene, renderer;
+var camera;
+var mesh;
+
+var isMouseDown = false;
+ 
+function init() {
+    
+    //シーンを作成
+    scene = new THREE.Scene(); 
+    
+    //カメラを作成
+    camera = new THREE.PerspectiveCamera( 100, window.innerWidth/window.innerHeight, 0.1, 100 ); 
+    camera.position.z = 0; 
+    camera.position.y = 0; 
+    
+    //レンダラーを作成
+    renderer = new THREE.WebGLRenderer(); 
+    renderer.setSize( window.innerWidth, window.innerHeight ); 
+    document.body.appendChild( renderer.domElement ); 
+    //背景色を設定
+    renderer.setClearColor(0x00ffff, 1); 
+    renderer.gammaOutput = true;
+    
+    //光源を作成
+    var light = new THREE.DirectionalLight("#c1582d", 1);
+    var ambient = new THREE.AmbientLight("#85b2cd");
+    light.position.set( 0, -70, 100 ).normalize();
+    scene.add(light);
+    scene.add(ambient);
+
+    var texture = new THREE.Texture();
+    var manager = new THREE.LoadingManager();
+    manager.onProgress = function ( item, loaded, total ) {};
+    var onProgress = function ( xhr ) {};
+    var onError = function ( xhr ) {};
+
+    // 3Dモデル用テクスチャ画像の読込
+    var loader = new THREE.GLTFLoader();
+    // texture.colorSpace = THREE.SRGBColorSpace;
+    // texture.flipY = false;
+    // Load a glTF resource
+    loader.load(
+        // resource URL
+        './hello_world.glb',
+        // called when the resource is loaded
+        function ( gltf ) {
+
+                mesh = gltf.scene;
+                mesh.scale.set( 100, 100,100 );
+                scene.add( mesh );
+
+// let specificMesh = gltf.scene.getObjectByName( 'mars' );
+
+//         // Create your object
+//         let customObjectGeometry = new THREE.BoxGeometry(1, 1, 1);
+//         let customObjectMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+//         let customObject = new THREE.Mesh(customObjectGeometry, customObjectMaterial);
+
+//         // Set the position relative to the specific mesh
+//         customObject.position.copy(specificMesh.position);
+//         customObject.position.y += 2; // Example: Render 2 units above the mesh
+
+//         // Add your object to the scene
+//         scene.add(customObject);
+
+    
+                //scene.add( gltf.scene );
+
+                // scene.add(gltf.animations); // Array<THREE.AnimationClip>
+                //gltf.scene; // THREE.Scene
+                //gltf.scenes; // Array<THREE.Scene>
+                //gltf.cameras; // Array<THREE.Camera>
+                //gltf.asset; // Object
+
+        },
+        // called when loading is in progresses
+        function ( xhr ) {
+
+                console.log( ( xhr.loaded / xhr.total * 100 ) + '% loaded' );
+
+        },
+        // called when loading has errors
+        function ( error ) {
+
+                console.log( 'An error happened' );
+
+        }
+    );
+    
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("touchstart", onMouseDown);
+    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener("touchend", onMouseUp);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("touchmove", onMouseMove);
+
+    render();   
+}
+
+function render() {
+    requestAnimationFrame( render ); 
+    renderer.render(scene, camera); 
+}
+
+
+// マウスを押したとき
+function onMouseDown(event) {
+    isMouseDown = true;
+}
+
+// マウスを動かした時
+function onMouseMove(event) {
+    if (isMouseDown) {
+        // 3DモデルをX軸とY軸方向に回転させます
+        if ( mesh ) {
+            mesh.rotation.y = getMouseX(event)/50;
+            mesh.rotation.x = getMouseY(event)/50;
+
+        }
+    }
+}
+
+// マウスを離したとき
+function onMouseUp(event) {
+    isMouseDown = false;
+}
+
+function getMouseX(event) {
+    if (event.type.indexOf("touch") == -1)
+        return event.clientX;
+    else
+        return event.touches[0].clientX;
+}
+
+function getMouseY(event) {
+    if (event.type.indexOf("touch") == -1)
+        return event.clientY;
+    else
+        return event.touches[0].clientY;
+}
+
+window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
