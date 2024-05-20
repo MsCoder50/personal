@@ -7,7 +7,7 @@ var scene = new THREE.Scene();
 var planets = [];
 var loader = new THREE.GLTFLoader();
 // let distanceFactor = 550;
-loader.load('models/sun' + '.glb', function (gltf) {
+loader.load('models/sun' + '.glb', function (gltf){
     var planet = gltf.scene;
     planets.push(planet);
 // planet.scale.set(0.1,0.1,0.1)
@@ -80,6 +80,22 @@ planet.scale.set(0.05,0.05,0.05)
 scene.add(planet);
 planet.position.set( 3700,0,0);
 })
+function addPlanetLabels() {
+    planets.forEach(function (planet) {
+        var planetName = planet.name;
+        var labelDiv = document.createElement('div');
+        labelDiv.className = 'planet-label';
+        labelDiv.textContent = planetName;
+        var label = new THREE.CSS2DObject(labelDiv);
+        label.position.copy(planet.position);
+        label.position.y += 450; // Adjust vertical position as needed
+        scene.add(label);
+    });
+}
+
+// Call the function to add planet labels
+addPlanetLabels();
+
 var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(50, 0, 0).normalize(); // Set light position
 scene.add(directionalLight);
@@ -105,17 +121,14 @@ document.body.appendChild(renderer.domElement);
 var camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 10000);
 camera.position.set(-1000, 0, 0); 
 scene.add(camera);
-const controls = new THREE.OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.5;
-controls.enableZoom = false;
 
-const controls2 = new TrackballControls(camera, renderer.domElement);
-controls2.noRotate = true;
+const controls = new TrackballControls(camera, renderer.domElement);
+controls.noRotate = true;
 controls.noPan = true;
-controls2.noZoom = false;
-controls2.zoomSpeed = 1.5;
+controls.noZoom = false;
+controls.zoomSpeed = 1.5;
 
+const controls2 = new THREE.OrbitControls( camera, renderer.domElement );
 // Load the panoramic image
 var loader = new THREE.TextureLoader();
 var texture = loader.load('models/panorami.jpg');
@@ -137,7 +150,6 @@ camera.far = 20000; // Adjust as needed based on the size of the skybox
 camera.updateProjectionMatrix();
 
 // Function to handle click events on planets
-// Function to handle click events on planets
 function onDocumentMouseDown(event) {
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -154,13 +166,15 @@ function onDocumentMouseDown(event) {
 }
 
 // Add mouse down event listener to the document
-document.addEventListener('mousedown', onDocumentMouseDown);
+// document.addEventListener('mousedown', onDocumentMouseDown);
+const hello = document.getElementById("hello");
+const boxPos = new THREE.Vector3();
 
 function animate() {
+    boxPos.setFromMatrixPosition(planets[0].matrixWorld)
     TWEEN.update();
+    controls.target.set(controls.target.x, controls.target.y, controls.target.z);
     controls.update();
-    controls2.target.set(controls.target.x, controls.target.y, controls.target.z);
-    controls2.update();
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
     
